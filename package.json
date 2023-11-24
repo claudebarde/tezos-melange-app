@@ -5,9 +5,12 @@
     "start": "concurrently \"make serve\" \"make watch\""
   },
   "dependencies": {
+    "@taquito/beacon-wallet": "^17.4.0",
     "@taquito/taquito": "^17.4.0",
+    "buffer": "^6.0.3",
     "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "react-dom": "^17.0.0",
+    "vite-compatible-readable-stream": "^3.6.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",

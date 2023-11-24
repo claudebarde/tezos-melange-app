@@ -14,9 +14,7 @@ let make = () => {
 
     let tezos = tezos_toolkit("https://mainnet.ecadinfra.com");
     let rpc = tezos |> TezosToolkit.rpc;
-    // let block_header = rpc->RpcClient.get_block_header;
     let _ = rpc |> RpcClient.get_block_header |> Js.Promise.then_(res => {
-      let _ = Js.log(res);
       let _ = set_level(_ => Some(res.level));
       Js.Promise.resolve();
     })
@@ -29,11 +27,11 @@ let make = () => {
         {
           (switch(level) {
             | None => "Loading"
-            | Some(level) => "Level " ++ (level->Belt.Int.toString)
+            | Some(level) => "Block level " ++ (level->Belt.Int.toString)
           })
           ->React.string
         }
       </div>
-      <button className=styles##connect_wallet>{"Connect wallet"->React.string}</button>
+      <WalletButton />
   </div>
 }

@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Melange Basic Template</title>
+    <title>Tezos Melange App</title>
+    <script>
+      const global = globalThis;
+    </script>
+    <script type="module">
+      import { Buffer } from "buffer";
+      window.Buffer = Buffer;
+    </script>
     <script type="module" src="/src/ReactApp.js"></script>
   </head>
   <body>
