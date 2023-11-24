@@ -1,21 +1,27 @@
 type t;
 
+type block_header_response = {
+    chain_id: string,
+    hash: string,
+    level: int,
+    timestamp: string
+};
+
 // RPC CLIENT INTERFACE
-module RpcClientInterface {
+module RpcClient {
     type t = {
-        get_block_header: {.
-            "level": int
-        }
+        chain: string,
+        rpc: string
     };
 
-    [@mel.get] external get_block_header: t =>
+    [@mel.send] external get_block_header: t => Js.Promise.t(block_header_response) = "getBlockHeader"
 }
 
 // TEZOS TOOLKIT
 module TezosToolkit {
     type t;
 
-    [@mel.get] external rpc: t => RpcClientInterface.t;
+    [@mel.get] external rpc: t => RpcClient.t;
 }
 
 [@mel.new] [@mel.module "@taquito/taquito"] 
