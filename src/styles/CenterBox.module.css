@@ -1,0 +1,34 @@
+.box {
+  color: white;
+  height: 40vh;
+  width: 40vw;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  --webkit-backdrop-filter: blur(5px);
+}
+
+button.connect_wallet {
+  color: #0a3a2a;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  --webkit-backdrop-filter: blur(5px);
+  transition: 0.3s;
+}
+button.connect_wallet:hover {
+  color: white;
+  background-color: #137a63;
+  border: solid 1px #137a63;
+}
