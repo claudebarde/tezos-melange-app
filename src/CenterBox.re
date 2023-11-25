@@ -8,6 +8,7 @@ type styles_css = {.
 [@react.component]
 let make = () => {
   let (level, set_level) = React.useState(() => None);
+  let (user_address, set_user_address) = React.useState(() => None);
 
   React.useEffect0(() => {
     open Taquito;
@@ -32,6 +33,15 @@ let make = () => {
           ->React.string
         }
       </div>
-      <WalletButton />
+      <div>
+        {
+          (switch(user_address) {
+            | None => ""
+            | Some(address) => address
+          })
+          ->React.string
+        }
+      </div>
+      <WalletButton user_address set_user_address />
   </div>
 }

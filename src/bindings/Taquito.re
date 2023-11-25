@@ -17,26 +17,6 @@ module RpcClient {
     [@mel.send] external get_block_header: t => Js.Promise.t(block_header_response) = "getBlockHeader"
 }
 
-// BEACON WALLET
-module BeaconWallet = {
-    type t;
-
-    // type new_wallet_options = {
-    //     name: string
-    // };
-    type wallet_options;
-
-    [@mel.obj]
-    external new_wallet_options: (
-        ~name: string,
-        ~description: string=?,
-        unit
-    ) => wallet_options;
-
-    [@mel.new] [@mel.module "@taquito/beacon-wallet"] 
-        external new_wallet: wallet_options => t = "BeaconWallet"
-}
-
 // TEZOS TOOLKIT
 module TezosToolkit {
     type t;
