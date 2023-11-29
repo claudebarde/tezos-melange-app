@@ -1,16 +1,10 @@
-type styles_css = {. 
-  "connect_wallet": string
-};
-
-[@mel.module] external styles: styles_css = "./styles/WalletButton.module.css";
-
 [@react.component]
 let make = (
         ~user_address: option(string), 
-        ~set_user_address: (option(string) => option(string)) => unit
+        ~set_user_address: (option(string) => option(string)) => unit,
+        ~wallet: option(BeaconWallet.t),
+        ~set_wallet: (option(BeaconWallet.t) => option(BeaconWallet.t)) => unit
     ) => {
-    let (wallet, set_wallet) = React.useState(() => None);
-
     let connect_wallet = () => {
         switch(wallet) {
             | None => {
@@ -81,15 +75,13 @@ let make = (
     {
         switch user_address {
             | None => 
-                <button 
-                    className=styles##connect_wallet 
+                <button  
                     onClick={_ => connect_wallet ()}
                 >
                     {"Connect wallet"->React.string}
                 </button>
             | Some(_) =>
                 <button 
-                    className=styles##connect_wallet
                     onClick={_ => disconnect_wallet ()}
                 >
                     {"Disconnect wallet"->React.string}
