@@ -1,7 +1,8 @@
 [%%raw "import './index.css'"];
-// [@module] external styles: Js.t({..}) = "./ReactApp.module.css";
 
 module App = {
+  let uuusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";
+
   [@react.component]
   let make = () => {
     let (tezos, set_tezos) = React.useState(() => None)
@@ -23,7 +24,7 @@ module App = {
       None
     });
 
-    // fetches the user's balance if connected
+    // fetches the user's XTZ and uUSD balances if connected
     React.useEffect1(() => {
       open Taquito;
 
@@ -33,17 +34,41 @@ module App = {
           switch tezos {
             | None => None
             | Some(tezos) => {
+              // fetches the XTZ balance
               let _ = 
-              tezos
-              -> TezosToolkit.tz_provider
-              -> TzProvider.get_balance(address)
-              |> Js.Promise.then_(res => {
-                  let _ = switch (Js.Nullable.toOption(res)){
-                    | None => set_user_xtz_balance(_ => Some(0))
-                    | Some(balance) => set_user_xtz_balance(_ => Some(BigNumber.to_number(balance)))
+                tezos
+                -> TezosToolkit.tz_provider
+                -> TzProvider.get_balance(address)
+                |> Js.Promise.then_(res => {
+                    let _ = switch (Js.Nullable.toOption(res)){
+                      | None => set_user_xtz_balance(_ => Some(0))
+                      | Some(balance) => set_user_xtz_balance(_ => Some(BigNumber.to_number(balance)))
+                    };
+                    Js.Promise.resolve()
+                  });
+              // fetches the uUSD balance
+              let _ =
+                tezos
+                -> TezosToolkit.contract
+                -> ContractProvider.at(uuusd_address)
+                |> Js.Promise.then_(res => {
+                  let _ = switch (Js.Nullable.toOption(res)) {
+                    | None => Js.log("failed to fetch the contract")
+                    | Some(contract) => {
+                      let _ = 
+                        contract
+                        |> Contract.storage
+                        |> Js.Promise.then_(storage => {
+                          let _ = switch (Js.Nullable.toOption(storage)) {
+                            | None => Js.log("failed to fetch the contract storage")
+                            | Some(storage) => Js.log(storage)
+                          };
+                          Js.Promise.resolve()
+                        })
+                    }
                   };
                   Js.Promise.resolve()
-                });
+                })
               None
             }
           }

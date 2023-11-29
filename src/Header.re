@@ -31,7 +31,7 @@ let make = (~level, ~user_address, ~user_xtz_balance) =>
           switch user_xtz_balance {
             | None => "Loading"
             | Some(balance) => 
-              "XTZ: " ++ (((balance |> Js.Float.fromString) /. 1_000_000.0) |> Js.Float.toString)
+              "XTZ: " ++ (((balance |> Js.Int.toFloat) /. 1_000_000.0) |> Js.Float.toString)
           }
         }
         -> React.string
