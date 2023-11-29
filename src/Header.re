@@ -6,7 +6,7 @@ let show_user_address = (address: string): string => {
 };
 
 [@react.component]
-let make = (~level, ~user_address) =>
+let make = (~level, ~user_address, ~user_xtz_balance) =>
     <header>
         <div>
         {
@@ -25,5 +25,15 @@ let make = (~level, ~user_address) =>
           })
           ->React.string
         }
+      </div>
+      <div>
+        {
+          switch user_xtz_balance {
+            | None => "Loading"
+            | Some(balance) => 
+              "XTZ: " ++ (((balance |> Js.Float.fromString) /. 1_000_000.0) |> Js.Float.toString)
+          }
+        }
+        -> React.string
       </div>
     </header>

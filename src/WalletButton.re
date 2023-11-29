@@ -61,7 +61,7 @@ let make = (
                     Js.Promise.resolve()
                 }
                 | Some(active_account) => {
-                    let _ = Js.log(active_account);
+                    // let _ = Js.log(active_account);
                     let _ = set_wallet(_ => Some(new_wallet));
                     let _ = set_user_address(_ => Some(active_account##address));
                     Js.Promise.resolve()

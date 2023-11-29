@@ -7,6 +7,7 @@
   "dependencies": {
     "@taquito/beacon-wallet": "^17.4.0",
     "@taquito/taquito": "^17.4.0",
+    "bignumber.js": "^9.1.2",
     "buffer": "^6.0.3",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
