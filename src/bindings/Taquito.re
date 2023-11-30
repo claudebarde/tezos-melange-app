@@ -1,5 +1,4 @@
 type t;
-type bigmap_abstraction;
 
 type block_header_response = {
     chain_id: string,
@@ -7,6 +6,36 @@ type block_header_response = {
     level: int,
     timestamp: string
 };
+
+// BIG MAP ABSTRACTION
+module BigMapAbstraction {
+    type t;
+    type key;
+    type value;
+
+    [@mel.get] external id: t => BigNumber.t = "id";
+
+    [@mel.send] external get:(t, key) => Js.Promise.t(Js.Nullable.t(value)) = "get";
+}
+
+// UUSD CONTRACT
+module Uusd {
+    module Ledger {
+        include BigMapAbstraction;
+        type key = {.
+            owner: string,
+            token_id: int
+        };
+        type value = BigNumber.t;
+    }
+
+    type storage = {
+        total_supply: BigNumber.t,
+        ledger: Ledger.t
+    };
+
+    let token_id = 0;
+}
 
 // RPC CLIENT INTERFACE
 module RpcClient {
@@ -46,7 +75,7 @@ module ContractProvider {
 module TezosToolkit {
     type t;
 
-    [@mel.get] external rpc: t => RpcClient.t;
+    [@mel.get] external rpc: t => RpcClient.t = "rpc";
     [@mel.send] external set_wallet_provider: (t, BeaconWallet.t) => unit = "setWalletProvider";
     [@mel.get] external tz_provider: t => TzProvider.t = "tz"
     [@mel.get] external contract: t => ContractProvider.t = "contract"

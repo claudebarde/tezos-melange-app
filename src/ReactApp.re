@@ -57,11 +57,21 @@ module App = {
                     | Some(contract) => {
                       let _ = 
                         contract
-                        |> Contract.storage
+                        |> Contract.uusd_storage
                         |> Js.Promise.then_(storage => {
                           let _ = switch (Js.Nullable.toOption(storage)) {
                             | None => Js.log("failed to fetch the contract storage")
-                            | Some(storage) => Js.log(storage)
+                            | Some(storage) => {
+                              // finds the user's balance in the storage
+                              let _ = 
+                                storage#ledger
+                                -> Uusd.Ledger.get({ owner: address, token_id: 0})
+                                |> Js.Promise.then_(res => {
+                                  let _ = Js.log(res);
+                                  Js.Promise.resolve()
+                                });
+                              ()
+                            }
                           };
                           Js.Promise.resolve()
                         })
