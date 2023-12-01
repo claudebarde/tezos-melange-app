@@ -21,12 +21,14 @@ module BigMapAbstraction {
 // UUSD CONTRACT
 module Uusd {
     module Ledger {
-        include BigMapAbstraction;
-        type key = {.
+        type t;
+        type key = {
             owner: string,
             token_id: int
         };
         type value = BigNumber.t;
+
+        [@mel.send] external get:(t, key) => Js.Promise.t(Js.Nullable.t(value)) = "get";
     }
 
     type storage = {
@@ -35,6 +37,8 @@ module Uusd {
     };
 
     let token_id = 0;
+
+    [@mel.get] external ledger: storage => Ledger.t = "ledger";
 }
 
 // RPC CLIENT INTERFACE

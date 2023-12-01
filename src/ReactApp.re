@@ -10,6 +10,7 @@ module App = {
     let (wallet, set_wallet) = React.useState(() => None);
     let (user_address, set_user_address) = React.useState(() => None);
     let (user_xtz_balance, set_user_xtz_balance) = React.useState(() => None);
+    let (user_uusd_balance, set_user_uusd_balance) = React.useState(() => None);
 
     React.useEffect0(() => {
       open Taquito;
@@ -63,11 +64,16 @@ module App = {
                             | None => Js.log("failed to fetch the contract storage")
                             | Some(storage) => {
                               // finds the user's balance in the storage
+                              let key: Uusd.Ledger.key = { owner: address, token_id: 0};
                               let _ = 
-                                storage#ledger
-                                -> Uusd.Ledger.get({ owner: address, token_id: 0})
+                                storage
+                                ->Uusd.ledger
+                                ->Uusd.Ledger.get(key)
                                 |> Js.Promise.then_(res => {
-                                  let _ = Js.log(res);
+                                  let _ = switch(Js.Nullable.toOption(res)) {
+                                    | None => set_user_uusd_balance(_ => Some(0))
+                                    | Some(balance) => set_user_uusd_balance(_ => Some(BigNumber.to_number(balance)))
+                                  };
                                   Js.Promise.resolve()
                                 });
                               ()
@@ -87,7 +93,7 @@ module App = {
     }, [|user_address|]);
     
       <>
-        <Header level user_address user_xtz_balance />
+        <Header level user_address user_xtz_balance user_uusd_balance />
         <CenterBox 
           user_address 
           set_user_address 
