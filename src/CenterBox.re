@@ -5,21 +5,19 @@ type styles_css = {.
   "buttons": string
 };
 
-type selected_token =
-| XTZ
-| UUSD;
-
-let show_selected_token = (tk: selected_token): string => 
-  switch tk {
-    | XTZ => "XTZ"
-    | UUSD => "uUSD"
-  };
-
 [@mel.module] external styles: styles_css = "./styles/CenterBox.module.css";
 
 [@react.component]
-let make = (~user_address, ~set_user_address, ~wallet, ~set_wallet) => {
-  let (selected_token, set_selected_token) = React.useState(() => XTZ);
+let make = (
+  ~user_address, 
+  ~set_user_address, 
+  ~wallet, 
+  ~set_wallet,
+  ~selected_token,
+  ~set_selected_token,
+  ~amount_to_send,
+  ~set_amount_to_send) => {
+  open Utils;
 
   <div className=styles##box> 
       <h1> {"Welcome to the Tezos Melange app"->React.string} </h1>
@@ -50,7 +48,20 @@ let make = (~user_address, ~set_user_address, ~wallet, ~set_wallet) => {
                   <span>{"Send uUSD"->React.string}</span>
                 </label>
               </div>
-              <input type_="text" placeholder={show_selected_token(selected_token)} />
+              <input 
+                type_="text" 
+                placeholder={show_selected_token(selected_token)} 
+                onChange=(event => {
+                  let value = ReactEvent.Form.target(event)##value;
+                  set_amount_to_send(_ => value->Belt.Int.fromString)
+                })
+                value={
+                  switch amount_to_send {
+                    | None => ""
+                    | Some(value) => value
+                  }
+                }
+              />
               <div className=styles##buttons>
                 <button>{("Send " ++ show_selected_token(selected_token))->React.string}</button>
                 <WalletButton user_address set_user_address wallet set_wallet />

@@ -18,10 +18,12 @@ type image = {.
 [@mel.module "./assets/wallet-90.png"] external wallet_logo: string = "default";
 [@mel.module "./assets/cross-90.png"] external cross_logo: string = "default";
 [@mel.module "./assets/check-90.png"] external check_logo: string = "default";
+[@mel.module "./assets/send-90.png"] external send_logo: string = "default";
 
 [@react.component]
-let make = (~center_text: option(string), ~connected: bool) => {
-    let _ = Js.log(wallet_logo);
+let make = (~center_text: option(string), ~connected: bool, ~selected_token) => {
+    open Utils;
+
     <div className={styles##body ++ " " ++ (connected ? styles##wide : styles##small)}>
         <div className=styles##left>
             {
@@ -44,6 +46,9 @@ let make = (~center_text: option(string), ~connected: bool) => {
                 | Some(text) => text
             }
         )->React.string}</div>
-        <div className=styles##right>{""->React.string}</div>
+        <div className=styles##right>
+            <img src=send_logo alt="send" />
+            {show_selected_token(selected_token)->React.string}
+        </div>
     </div>
 }

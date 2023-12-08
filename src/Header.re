@@ -37,27 +37,36 @@ let balance_to_element = (balance: option(int), token: string): React.element =>
 };
 
 [@react.component]
-let make = (~level, ~user_address, ~user_xtz_balance, ~user_uusd_balance) =>
-    <header>
-        <div className=styles##level>
-        {
-          (switch(level) {
-            | None => "Loading"
-            | Some(level) => "Block level " ++ (level->Belt.Int.toString)
-          })
-          ->React.string
-        }
-      </div>
-      <div className=styles##center>
-        {
-          (switch(user_address) {
-            | None => <Island connected=false center_text=None />
-            | Some(address) => <Island connected=true center_text=(address->show_user_address->Some) />
-          })
-        }
-      </div>
-      <div className=styles##tokens>
-        <div>{ balance_to_element(user_xtz_balance, "XTZ") }</div>
-        <div>{ balance_to_element(user_uusd_balance, "uUSD") }</div>
-      </div>
-    </header>
+let make = (~level, ~user_address, ~user_xtz_balance, ~user_uusd_balance, ~selected_token) => {
+  <header>
+      <div className=styles##level>
+      {
+        (switch(level) {
+          | None => "Loading"
+          | Some(level) => "Block level " ++ (level->Belt.Int.toString)
+        })
+        ->React.string
+      }
+    </div>
+    <div className=styles##center>
+      {
+        (switch(user_address) {
+          | None => <Island connected=false center_text=None selected_token />
+          | Some(address) => <Island connected=true center_text=(address->show_user_address->Some) selected_token />
+        })
+      }
+    </div>
+    <div className=styles##tokens>
+      {
+        (switch(user_address) {
+          | None => React.null
+          | Some(_) => 
+            <>
+              <div>{ balance_to_element(user_xtz_balance, "XTZ") }</div>
+              <div>{ balance_to_element(user_uusd_balance, "uUSD") }</div>
+            </>
+        })
+      }
+    </div>
+  </header>
+}

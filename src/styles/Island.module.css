@@ -65,17 +65,71 @@ body img {
   position: relative;
   left: -35px;
   bottom: -5px;
+  opacity: 0;
+  animation: wallet-cross 1.2s ease-out both;
+  animation-delay: 1s;
 }
 
 .check {
   position: relative;
   left: -32px;
   bottom: -2px;
+  opacity: 0;
+  animation: wallet-check 1.2s ease-out both;
+  animation-delay: 1s;
+}
+
+@keyframes wallet-cross {
+  from {
+    position: relative;
+    left: -95px;
+    opacity: 0;
+    transform: rotate(-180deg);
+  }
+
+  to {
+    position: relative;
+    left: -35px;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes wallet-check {
+  from {
+    position: relative;
+    left: -95px;
+    opacity: 0;
+    transform: rotate(-180deg);
+  }
+
+  to {
+    position: relative;
+    left: -32px;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
 }
 
 /*
 *   CENTER
 */
+
+.center {
+  opacity: 0;
+  animation: show 1s ease-out both;
+  animation-delay: 1s;
+}
+
+@keyframes show {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 
 /*
 *   RIGHT
