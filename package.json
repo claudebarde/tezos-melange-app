@@ -17,6 +17,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@vitejs/plugin-react": "^4.2.0",
     "concurrently": "^8.2.2",
+    "sass": "^1.69.5",
     "vite": "^5.0.2"
   }
 }

@@ -39,6 +39,7 @@
   index.html
   (glob_files_rec src/*.css)
   (glob_files_rec src/*.svg)
+  (glob_files_rec src/*.png)
   (glob_files_rec src/*.json))
  ; Uncomment the following to copy the generated JavaScript files inside the source tree
  (promote (until-clean))

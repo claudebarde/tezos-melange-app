@@ -2,8 +2,16 @@ header {
   width: calc(100vw - 20px);
   padding: 10px;
   color: white;
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+  justify-items: center;
+  align-items: center;
+  min-height: 30px;
+}
+
+.center {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
 }
 

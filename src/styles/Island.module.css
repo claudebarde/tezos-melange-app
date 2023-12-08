@@ -1,0 +1,89 @@
+/*
+*   GENERAL
+*/
+
+.body {
+  padding: 10px 20px;
+  background: rgb(10, 58, 42);
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: 20% 60% 20%;
+  justify-items: center;
+  align-items: center;
+  position: relative;
+}
+
+body img {
+  height: 30px;
+  width: 30px;
+}
+
+.body.small {
+  width: 20vw;
+  height: 30px;
+  animation: become-small 1s forwards;
+}
+.body.wide {
+  width: 30vw;
+  height: 30px;
+  animation: become-wide 1s forwards;
+}
+
+@keyframes become-wide {
+  from {
+    width: 20vw;
+  }
+
+  to {
+    width: 30vw;
+  }
+}
+
+@keyframes become-small {
+  from {
+    width: 30vw;
+  }
+
+  to {
+    width: 20vw;
+  }
+}
+
+/*
+*   LEFT
+*/
+
+.left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  gap: 0px;
+}
+
+.cross {
+  position: relative;
+  left: -35px;
+  bottom: -5px;
+}
+
+.check {
+  position: relative;
+  left: -32px;
+  bottom: -2px;
+}
+
+/*
+*   CENTER
+*/
+
+/*
+*   RIGHT
+*/
+
+.right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+}

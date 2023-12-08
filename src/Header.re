@@ -1,13 +1,14 @@
 type styles_css = {. 
   "header": string,
-  "tokens": string
+  "tokens": string,
+  "level": string,
+  "center": string
 };
 
 [@mel.module] external styles: styles_css = "./styles/Header.module.css";
 
 let show_user_address = (address: string): string => {
-    "Your address: " 
-    ++ Js.String.slice(~from=0, ~to_=7, address) 
+    Js.String.slice(~from=0, ~to_=7, address) 
     ++ "..." 
     ++ Js.String.sliceToEnd(~from=-7, address)
 };
@@ -38,7 +39,7 @@ let balance_to_element = (balance: option(int), token: string): React.element =>
 [@react.component]
 let make = (~level, ~user_address, ~user_xtz_balance, ~user_uusd_balance) =>
     <header>
-        <div>
+        <div className=styles##level>
         {
           (switch(level) {
             | None => "Loading"
@@ -47,13 +48,12 @@ let make = (~level, ~user_address, ~user_xtz_balance, ~user_uusd_balance) =>
           ->React.string
         }
       </div>
-      <div>
+      <div className=styles##center>
         {
           (switch(user_address) {
-            | None => ""
-            | Some(address) => show_user_address(address)
+            | None => <Island connected=false center_text=None />
+            | Some(address) => <Island connected=true center_text=(address->show_user_address->Some) />
           })
-          ->React.string
         }
       </div>
       <div className=styles##tokens>
