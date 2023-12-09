@@ -141,3 +141,6 @@ body img {
   align-items: center;
   text-align: right;
 }
+.right img {
+  margin-right: 5px;
+}

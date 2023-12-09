@@ -19,10 +19,23 @@ type image = {.
 [@mel.module "./assets/cross-90.png"] external cross_logo: string = "default";
 [@mel.module "./assets/check-90.png"] external check_logo: string = "default";
 [@mel.module "./assets/send-90.png"] external send_logo: string = "default";
+[@mel.module "./assets/keyboard-90.png"] external keyboard_logo: string = "default";
 
 [@react.component]
-let make = (~center_text: option(string), ~connected: bool, ~selected_token) => {
-    open Utils;
+let make = (~center_text: option(string), ~connected: bool) => {
+    let context = React.useContext(Context.context);
+
+    // let (typing_amount, set_typing_amount) = React.useState(() => false);
+
+    // let _ = 
+    //     switch context.amount_to_send {
+    //         | None => set_typing_amount(_ => false)
+    //         | Some(_) => {
+    //             let _ = set_typing_amount(_ => true);
+    //             let _ = Js.Global.setTimeout(() => set_typing_amount(_ => false), 1000);
+    //             ()
+    //         }
+    //     };
 
     <div className={styles##body ++ " " ++ (connected ? styles##wide : styles##small)}>
         <div className=styles##left>
@@ -47,8 +60,21 @@ let make = (~center_text: option(string), ~connected: bool, ~selected_token) => 
             }
         )->React.string}</div>
         <div className=styles##right>
-            <img src=send_logo alt="send" />
-            {show_selected_token(selected_token)->React.string}
+            // {
+            //     typing_amount ? 
+            //         <img src=keyboard_logo alt="keyboard" /> : 
+            //         <img src=send_logo alt="send" />
+            // }
+            {
+                (switch context.user_address {
+                    | None => React.null
+                    | Some(_) => 
+                        <>
+                            <img src=send_logo alt="send" />
+                            {Utils.show_selected_token(context.selected_token)}->React.string
+                        </>
+                })
+            }
         </div>
     </div>
 }

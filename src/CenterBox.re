@@ -8,22 +8,14 @@ type styles_css = {.
 [@mel.module] external styles: styles_css = "./styles/CenterBox.module.css";
 
 [@react.component]
-let make = (
-  ~user_address, 
-  ~set_user_address, 
-  ~wallet, 
-  ~set_wallet,
-  ~selected_token,
-  ~set_selected_token,
-  ~amount_to_send,
-  ~set_amount_to_send) => {
-  open Utils;
+let make = (~wallet, ~set_wallet) => {
+  let context = React.useContext(Context.context);
 
   <div className=styles##box> 
       <h1> {"Welcome to the Tezos Melange app"->React.string} </h1>
       {
-        switch user_address {
-          | None => <WalletButton user_address set_user_address wallet set_wallet />
+        switch context.user_address {
+          | None => <WalletButton wallet set_wallet />
           | Some(_) =>
             <div className=styles##select_token>
               <div className=styles##select_token_radio>
@@ -31,9 +23,9 @@ let make = (
                   <input 
                     type_="radio" 
                     name="action-select" 
-                    value={show_selected_token(XTZ)} 
-                    checked={selected_token == XTZ}
-                    onChange=(_ => set_selected_token(_ => XTZ))
+                    value={Utils.show_selected_token(XTZ)} 
+                    checked={context.selected_token == XTZ}
+                    onChange=(_ => context.set_selected_token(_ => XTZ))
                   />
                   <span>{"Send XTZ"->React.string}</span>
                 </label>
@@ -41,30 +33,31 @@ let make = (
                   <input 
                     type_="radio" 
                     name="action-select" 
-                    value={show_selected_token(UUSD)}  
-                    checked={selected_token == UUSD}
-                    onChange=(_ => set_selected_token(_ => UUSD))
+                    value={Utils.show_selected_token(UUSD)}  
+                    checked={context.selected_token == UUSD}
+                    onChange=(_ => context.set_selected_token(_ => UUSD))
                   />
                   <span>{"Send uUSD"->React.string}</span>
                 </label>
               </div>
               <input 
                 type_="text" 
-                placeholder={show_selected_token(selected_token)} 
+                placeholder={Utils.show_selected_token(context.selected_token)} 
                 onChange=(event => {
                   let value = ReactEvent.Form.target(event)##value;
-                  set_amount_to_send(_ => value->Belt.Int.fromString)
+                  // set_amount_to_send(_ => value->Belt.Int.fromString)
+                  context.set_amount_to_send(_ => value->Belt.Int.fromString)
                 })
                 value={
-                  switch amount_to_send {
+                  switch context.amount_to_send {
                     | None => ""
-                    | Some(value) => value
+                    | Some(value) => value->Belt.Int.toString
                   }
                 }
               />
               <div className=styles##buttons>
-                <button>{("Send " ++ show_selected_token(selected_token))->React.string}</button>
-                <WalletButton user_address set_user_address wallet set_wallet />
+                <button>{("Send " ++ Utils.show_selected_token(context.selected_token))->React.string}</button>
+                <WalletButton wallet set_wallet />
               </div>
             </div>
         }

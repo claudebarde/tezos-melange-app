@@ -1,10 +1,10 @@
 [@react.component]
 let make = (
-        ~user_address: option(string), 
-        ~set_user_address: (option(string) => option(string)) => unit,
         ~wallet: option(BeaconWallet.t),
         ~set_wallet: (option(BeaconWallet.t) => option(BeaconWallet.t)) => unit
     ) => {
+    let context = React.useContext(Context.context);
+
     let connect_wallet = () => {
         switch(wallet) {
             | None => {
@@ -19,7 +19,7 @@ let make = (
                             new_wallet 
                             |> BeaconWallet.get_pkh 
                             |> Js.Promise.then_(address => {
-                                let _ = set_user_address(_ => Some(address));
+                                let _ = context.set_user_address(_ => Some(address));
                                 Js.Promise.resolve()
                             })
                         Js.Promise.resolve()
@@ -41,7 +41,7 @@ let make = (
                 |> BeaconWallet.clear_active_account 
                 |> Js.Promise.then_(_ => {
                     let _ = set_wallet(_ => None);
-                    let _ = set_user_address(_ => None);
+                    let _ = context.set_user_address(_ => None);
                     Js.Promise.resolve()
                 });
                 ()
@@ -57,13 +57,13 @@ let make = (
             switch(Js.Nullable.toOption(res)){
                 | None => {
                     let _ = set_wallet(_ => None);
-                    let _ = set_user_address(_ => None);
+                    let _ = context.set_user_address(_ => None);
                     Js.Promise.resolve()
                 }
                 | Some(active_account) => {
                     // let _ = Js.log(active_account);
                     let _ = set_wallet(_ => Some(new_wallet));
-                    let _ = set_user_address(_ => Some(active_account##address));
+                    let _ = context.set_user_address(_ => Some(active_account##address));
                     Js.Promise.resolve()
                 }
             }
@@ -73,7 +73,7 @@ let make = (
     });
 
     {
-        switch user_address {
+        switch context.user_address {
             | None => 
                 <button  
                     onClick={_ => connect_wallet ()}
