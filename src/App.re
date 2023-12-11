@@ -6,7 +6,7 @@ let make = () => {
     let (level, set_level) = React.useState(() => None);
     let (wallet, set_wallet) = React.useState(() => None);
 
-    React.useEffect0(() => {
+    React.useEffect1(() => {
         open Taquito;
 
         let tezos = tezos_toolkit("https://mainnet.ecadinfra.com");
@@ -17,15 +17,19 @@ let make = () => {
         Js.Promise.resolve();
         })
         None
-    });
+    }, [||]);
 
     // fetches the user's XTZ and uUSD balances if connected
     React.useEffect1(() => {
         open Taquito;
 
         switch context.user_address {
-        | None => None
+        | None => {
+            let _ = context.set_selected_token(_ => NOTOKEN);
+            None
+        }
         | Some(address) => {
+            let _ = context.set_selected_token(_ => XTZ);
             switch tezos {
             | None => None
             | Some(tezos) => {
@@ -36,8 +40,8 @@ let make = () => {
                 -> TzProvider.get_balance(address)
                 |> Js.Promise.then_(res => {
                     let _ = switch (Js.Nullable.toOption(res)){
-                        | None => context.set_user_xtz_balance(_ => Some(0))
-                        | Some(balance) => context.set_user_xtz_balance(_ => Some(BigNumber.to_number(balance)))
+                        | None => context.set_xtz_balance(_ => Some(0))
+                        | Some(balance) => context.set_xtz_balance(_ => Some(BigNumber.to_number(balance)))
                     };
                     Js.Promise.resolve()
                     });
@@ -65,8 +69,8 @@ let make = () => {
                                 ->Uusd.Ledger.get(key)
                                 |> Js.Promise.then_(res => {
                                     let _ = switch(Js.Nullable.toOption(res)) {
-                                    | None => context.set_user_uusd_balance(_ => Some(0))
-                                    | Some(balance) => context.set_user_uusd_balance(_ => Some(BigNumber.to_number(balance)))
+                                    | None => context.set_uusd_balance(_ => Some(0))
+                                    | Some(balance) => context.set_uusd_balance(_ => Some(BigNumber.to_number(balance)))
                                     };
                                     Js.Promise.resolve()
                                 });
@@ -86,10 +90,9 @@ let make = () => {
         }
     }, [|context.user_address|]);
 
-        <Context>
-            <Header level />
-            <CenterBox set_wallet wallet />
-            <footer></footer>
-        </Context>
-    ;
+    <>
+        <Header level />
+        <CenterBox set_wallet wallet />
+        <footer></footer>
+    </>
 }

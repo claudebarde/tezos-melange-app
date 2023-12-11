@@ -48,7 +48,7 @@ let make = (
         }
     }
 
-    React.useEffect0(() => {
+    React.useEffect1(() => {
         let wallet_options = BeaconWallet.new_wallet_options(~name="Tezos Melange App", ());
         let new_wallet = BeaconWallet.new_wallet(wallet_options);
         let _ = new_wallet.client 
@@ -61,7 +61,6 @@ let make = (
                     Js.Promise.resolve()
                 }
                 | Some(active_account) => {
-                    // let _ = Js.log(active_account);
                     let _ = set_wallet(_ => Some(new_wallet));
                     let _ = context.set_user_address(_ => Some(active_account##address));
                     Js.Promise.resolve()
@@ -70,7 +69,7 @@ let make = (
         });
 
         None
-    });
+    }, [||]);
 
     {
         switch context.user_address {

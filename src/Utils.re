@@ -1,7 +1,8 @@
-let uuusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";
+type right_cell_status =
+| NoWallet
+| Typing
+| Send
+| Sending
+| Error
 
-let show_selected_token = (tk: Context.selected_token): string => 
-    switch tk {
-        | XTZ => "XTZ"
-        | UUSD => "uUSD"
-    };
+let uuusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";

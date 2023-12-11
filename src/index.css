@@ -43,3 +43,11 @@ button:hover {
   background-color: #137a63;
   border: solid 1px #137a63;
 }
+
+input[type="text"] {
+  border: solid 2px transparent;
+}
+input[type="text"].error {
+  border-color: red;
+  outline: none;
+}

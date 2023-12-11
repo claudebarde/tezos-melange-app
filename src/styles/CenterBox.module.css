@@ -37,7 +37,6 @@
 .select_token > input[type="text"] {
   font-size: inherit;
   padding: 10px;
-  border: none;
   border-radius: 5px;
   margin-bottom: 20px;
 }

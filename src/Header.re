@@ -39,6 +39,13 @@ let balance_to_element = (balance: option(int), token: string): React.element =>
 [@react.component]
 let make = (~level) => {
   let context = React.useContext(Context.context);
+  // let context_ref = Context.context->React.useContext->React.useRef;
+
+  // React.useEffect1(() => {
+  //   let _ = Js.log(context);
+
+  //   None
+  // }, [|context.user_address|]);
 
   <header>
       <div className=styles##level>
@@ -53,8 +60,24 @@ let make = (~level) => {
     <div className=styles##center>
       {
         (switch(context.user_address) {
-          | None => <Island connected=false center_text=None />
-          | Some(address) => <Island connected=true center_text=(address->show_user_address->Some) />
+          | None => 
+              <Island 
+                connected=false 
+                center_text=None 
+                right_cell=context.island_right_cell_status 
+                update_right_cell=context.set_island_right_cell_status
+                selected_token=context.selected_token
+                show_selected_token=context.show_selected_token
+              />
+          | Some(address) => 
+              <Island 
+                connected=true 
+                center_text=(address->show_user_address->Some)  
+                right_cell=context.island_right_cell_status 
+                update_right_cell=context.set_island_right_cell_status
+                selected_token=context.selected_token
+                show_selected_token=context.show_selected_token
+              />
         })
       }
     </div>
