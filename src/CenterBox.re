@@ -7,9 +7,12 @@ type styles_css = {.
 
 [@mel.module] external styles: styles_css = "./styles/CenterBox.module.css";
 
+type island_status = Context.Utils.right_cell_status;
+
 [@react.component]
 let make = (~wallet, ~set_wallet) => {
   let context = React.useContext(Context.context);
+  let show_selected_token = Context.Utils.(show_selected_token);
 
   let (error_amount, set_error_amount) = React.useState(_ => false);
 
@@ -25,7 +28,7 @@ let make = (~wallet, ~set_wallet) => {
                   <input 
                     type_="radio" 
                     name="action-select" 
-                    value={context.show_selected_token(XTZ)} 
+                    value={show_selected_token(XTZ)} 
                     checked={context.selected_token == XTZ}
                     onChange=(_ => context.set_selected_token(_ => XTZ))
                   />
@@ -35,7 +38,7 @@ let make = (~wallet, ~set_wallet) => {
                   <input 
                     type_="radio" 
                     name="action-select" 
-                    value={context.show_selected_token(UUSD)}  
+                    value={show_selected_token(UUSD)}  
                     checked={context.selected_token == UUSD}
                     onChange=(_ => context.set_selected_token(_ => UUSD))
                   />
@@ -45,13 +48,13 @@ let make = (~wallet, ~set_wallet) => {
               <input 
                 type_="text" 
                 className={error_amount == true ? "error" : ""}
-                placeholder={context.show_selected_token(context.selected_token)} 
+                placeholder={show_selected_token(context.selected_token)} 
                 onChange=(event => {
-                  let _ = context.set_island_right_cell_status(_ => Utils.Typing);
+                  let _ = context.set_island_right_cell_status(_ => Typing);
                   // resets error display
                   let _ = set_error_amount(_ => false);
-                  // checks if error
                   let value = ReactEvent.Form.target(event)##value;
+                  // checks if amount is not a number
                   let _ = 
                     switch value->Belt.Float.fromString {
                       | None => {
@@ -59,17 +62,67 @@ let make = (~wallet, ~set_wallet) => {
                             set_error_amount(_ => false)
                           } 
                           else {
-                            let _ = context.set_island_right_cell_status(_ => Utils.Error);
+                            let _ = context.set_island_right_cell_status(_ => Error);
                             set_error_amount(_ => true)
                           }
                       }
                       | Some(float_val) => {
                           if (float_val->Belt.Float.toString != value) {
-                            let _ = context.set_island_right_cell_status(_ => Utils.Error);
+                            let _ = context.set_island_right_cell_status(_ => Error);
                             set_error_amount(_ => true)
                           } 
                           else {
-                            set_error_amount(_ => false)
+                            // checks if user has enough balance
+                            switch context.selected_token {
+                              | XTZ => {
+                                switch ((Context.Utils.token_from_display(value, XTZ)), context.user_xtz_balance) {
+                                  | (Ok(value), Some(balance)) => {
+                                    // compares value with XTZ balance
+                                    if (value > balance) {
+                                      let _ = context.set_island_right_cell_status(_ => Error);
+                                      set_error_amount(_ => true);
+                                    } else {
+                                      set_error_amount(_ => false)
+                                    }
+                                  }
+                                  | (Error(err), _) => {
+                                    let _ = context.set_island_right_cell_status(_ => Error);
+                                    let _ = set_error_amount(_ => true);
+                                    Js.log(err)
+                                  }
+                                  | _ => {
+                                    let _ = context.set_island_right_cell_status(_ => Error);
+                                    let _ = set_error_amount(_ => true);
+                                    Js.log("Unexpected error while comparing input amount with current XTZ balance")
+                                  }
+                                }
+                              }
+                              | UUSD => {
+                                switch ((Context.Utils.token_from_display(value, UUSD)), context.user_uusd_balance) {
+                                  | (Ok(value), Some(balance)) => {
+                                    // compares value with uUSD balance
+                                    let _ = Js.log2(value, balance);
+                                    if (value > balance) {
+                                      let _ = context.set_island_right_cell_status(_ => Error);
+                                      set_error_amount(_ => true);
+                                    } else {
+                                      set_error_amount(_ => false)
+                                    }
+                                  }
+                                  | (Error(err), _) => {
+                                    let _ = context.set_island_right_cell_status(_ => Error);
+                                    let _ = set_error_amount(_ => true);
+                                    Js.log(err)
+                                  }
+                                  | _ => {
+                                    let _ = context.set_island_right_cell_status(_ => Error);
+                                    let _ = set_error_amount(_ => true);
+                                    Js.log("Unexpected error while comparing input amount with current uUSD balance")
+                                  }
+                                }
+                              }
+                              | _ => ()
+                            }
                           }
                         }
                     };
@@ -83,7 +136,7 @@ let make = (~wallet, ~set_wallet) => {
                 }
               />
               <div className=styles##buttons>
-                <button>{("Send " ++ context.show_selected_token(context.selected_token))->React.string}</button>
+                <button>{("Send " ++ show_selected_token(context.selected_token))->React.string}</button>
                 <WalletButton wallet set_wallet />
               </div>
             </div>

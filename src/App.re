@@ -49,7 +49,7 @@ let make = () => {
                 let _ =
                 tezos
                 -> TezosToolkit.contract
-                -> ContractProvider.at(Utils.uuusd_address)
+                -> ContractProvider.at(Context.Utils.uusd_address)
                 |> Js.Promise.then_(res => {
                     let _ = switch (Js.Nullable.toOption(res)) {
                     | None => Js.log("failed to fetch the contract")
@@ -70,7 +70,9 @@ let make = () => {
                                 |> Js.Promise.then_(res => {
                                     let _ = switch(Js.Nullable.toOption(res)) {
                                     | None => context.set_uusd_balance(_ => Some(0))
-                                    | Some(balance) => context.set_uusd_balance(_ => Some(BigNumber.to_number(balance)))
+                                    | Some(balance) => {
+                                        context.set_uusd_balance(_ => Some(BigNumber.to_number(balance)))
+                                    }
                                     };
                                     Js.Promise.resolve()
                                 });

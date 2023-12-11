@@ -13,39 +13,29 @@ let show_user_address = (address: string): string => {
     ++ Js.String.sliceToEnd(~from=-7, address)
 };
 
-let balance_to_element = (balance: option(int), token: string): React.element => {
-    <>
-      <span>{(token ++ ": ")->React.string}</span>
-      <span>
-        {
-          (switch balance {
-          | None => "Loading"
-          | Some(balance) => 
-                {
-                  (((
-                      balance |> Js.Int.toFloat
-                    ) /. 1_000_000.0
-                    ) 
-                    |> Js.Float.toString
-                  )
-                }
-              
-          })-> React.string
-        }
-      </span>
-    </>
-};
 
 [@react.component]
 let make = (~level) => {
   let context = React.useContext(Context.context);
-  // let context_ref = Context.context->React.useContext->React.useRef;
 
-  // React.useEffect1(() => {
-  //   let _ = Js.log(context);
-
-  //   None
-  // }, [|context.user_address|]);
+  let balance_to_element = (balance: option(int), token: Context.selected_token): React.element => {
+      <>
+        <span>{(Context.Utils.show_selected_token(token) ++ ": ")->React.string}</span>
+        <span>
+          {
+            (switch balance {
+            | None => "Loading"
+            | Some(balance) => {
+              switch (Context.Utils.token_to_display(balance, token)) {
+                  | Ok(res) => res
+                  | Error(err) => err
+                }
+            }                
+            })-> React.string
+          }
+        </span>
+      </>
+  };
 
   <header>
       <div className=styles##level>
@@ -67,7 +57,6 @@ let make = (~level) => {
                 right_cell=context.island_right_cell_status 
                 update_right_cell=context.set_island_right_cell_status
                 selected_token=context.selected_token
-                show_selected_token=context.show_selected_token
               />
           | Some(address) => 
               <Island 
@@ -76,7 +65,6 @@ let make = (~level) => {
                 right_cell=context.island_right_cell_status 
                 update_right_cell=context.set_island_right_cell_status
                 selected_token=context.selected_token
-                show_selected_token=context.show_selected_token
               />
         })
       }
@@ -87,8 +75,8 @@ let make = (~level) => {
           | None => React.null
           | Some(_) => 
             <>
-              <div>{ balance_to_element(context.user_xtz_balance, "XTZ") }</div>
-              <div>{ balance_to_element(context.user_uusd_balance, "uUSD") }</div>
+              <div>{ balance_to_element(context.user_xtz_balance, XTZ) }</div>
+              <div>{ balance_to_element(context.user_uusd_balance, UUSD) }</div>
             </>
         })
       }

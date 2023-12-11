@@ -27,24 +27,11 @@ type image = {.
 let make = (
     ~center_text: option(string), 
     ~connected: bool, 
-    ~right_cell: Utils.right_cell_status,
-    ~update_right_cell: (Utils.right_cell_status => Utils.right_cell_status) => unit,
-    ~selected_token: Context.selected_token,
-    ~show_selected_token: Context.selected_token => string) => {
+    ~right_cell: Context.Utils.right_cell_status,
+    ~update_right_cell: (Context.Utils.right_cell_status => Context.Utils.right_cell_status) => unit,
+    ~selected_token: Context.selected_token) => {
 
-    let dummy_timeout_id = Js.Global.setTimeout(() => (), 1);
-
-    let (_, set_typing_timeout) = React.useState(() => dummy_timeout_id);
-
-    // let _ = 
-    //     switch context.amount_to_send {
-    //         | None => set_typing_amount(_ => false)
-    //         | Some(_) => {
-    //             let _ = set_typing_amount(_ => true);
-    //             let _ = Js.Global.setTimeout(() => set_typing_amount(_ => false), 1000);
-    //             ()
-    //         }
-    //     };
+    let (_, set_typing_timeout) = React.useState(() => None);
 
     React.useEffect1(() => {
         let _ = 
@@ -52,23 +39,18 @@ let make = (
                 | Typing => {
                     set_typing_timeout(prev_timeout => {
                         let timeout = 3_000;
-                        let _ = Js.Global.clearTimeout(prev_timeout);
+                        let _ = switch prev_timeout {
+                            | Some(timeout) => {
+                                let _ = Js.Global.clearTimeout(timeout);
+                            }
+                            | _ => ()
+                        };
                         Js.Global.setTimeout(() => {
-                            let _ = set_typing_timeout(_ => dummy_timeout_id);
-                            update_right_cell(_ => Utils.Send)
-                        }, timeout)
-                        // if (prev_timeout == 0) {
-                        //     // setting up the first timeout
-                        //     Js.Global.setTimeout(() => set_typing_timeout(_ => dummy_timeout_id), timeout)
-                        // }
-                        // else {
-                        //     // timeout already exists, must be canceled before setting up a new one
-                        //     let _ = Js.Global.clearTimeout(prev_timeout);
-                        //     Js.Global.setTimeout(() => set_typing_timeout(_ => dummy_timeout_id), timeout)
-                        // }
+                            update_right_cell(_ => Context.Utils.Send)
+                        }, timeout)->Some
                     })
                 }
-                | _ => set_typing_timeout(_ => dummy_timeout_id)
+                | _ => set_typing_timeout(_ => None)
             };
 
         None
@@ -106,7 +88,7 @@ let make = (
                             | _ => 
                                 <>
                                     <img src=send_logo alt="send" />
-                                    {show_selected_token(selected_token)}->React.string
+                                    {Context.Utils.show_selected_token(selected_token)}->React.string
                                 </>
                         }
                     | Sending => React.null
