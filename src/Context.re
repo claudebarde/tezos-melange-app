@@ -13,7 +13,8 @@ module Utils = {
     | Sending
     | Error
 
-    let uusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";
+    // let uusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";
+    let uusd_address = "KT1LkNWZgVYh3zdaRkBb9aNgLEFCjVJwEKu2";
 
     let show_selected_token = (tk: selected_token): string => 
         switch tk {
@@ -22,7 +23,7 @@ module Utils = {
             | UUSD => "uUSD"
         };
     
-    let token_from_display = (value: string, token: selected_token): result(int, string) => {
+    let token_from_display = (value: string, token: selected_token): result(float, string) => {
         let exponent = switch token {
             | XTZ => 1_000_000.
             | UUSD => 10. ** 12.
@@ -33,7 +34,7 @@ module Utils = {
         } else {
             switch (value |> Belt.Float.fromString) {
                 | None => Error("error")
-                | Some(float_val) => Ok((float_val *. exponent) |> Belt.Int.fromFloat)
+                | Some(float_val) => Ok(float_val *. exponent)
             }
         }
     };
@@ -50,27 +51,12 @@ module Utils = {
             Ok(((value |> Belt.Float.fromInt) /. exponent) |> Belt.Float.toString)
         }
     };
-
-    // let format_token_amount = (value: float, token: selected_token, with_decimals: bool): result(int, string) => {
-    //     let exponent = switch token {
-    //         | XTZ => 1_000_000.
-    //         | UUSD => 10. ** 12.
-    //         | _ => 0.
-    //     };
-    //     if (exponent == 0.) {
-    //         Error("wrong token")
-    //     } else {
-    //         Ok(
-    //             (with_decimals ? value *. exponent : value /. exponent)
-    //             ->Belt.Float.toInt
-    //         )
-    //     }
-    //     };
 }
-
 
 type projectContext = 
 {
+    tezos: option(Taquito.TezosToolkit.t),
+    set_tezos: (option(Taquito.TezosToolkit.t) => option(Taquito.TezosToolkit.t)) => unit,
     user_address: option(string),
     set_user_address: (option(string) => option(string)) => unit,
     user_xtz_balance: option(int),
@@ -86,6 +72,8 @@ type projectContext =
 };
 
 let context = React.createContext({ 
+    tezos: None,
+    set_tezos: _ => (),
     user_address: None,
     set_user_address: _ => (),
     user_xtz_balance: None,
@@ -115,6 +103,7 @@ module Provider = {
 
 [@react.component]
 let make = (~children) => {
+    let (tezos, set_tezos) = React.useState(() => None)
     let (amount_to_send, set_amount_to_send) = React.useState(() => None);
     let (user_address, set_user_address) = React.useState(() => None);
     let (user_xtz_balance, set_xtz_balance) = React.useState(() => None);
@@ -123,6 +112,8 @@ let make = (~children) => {
     let (island_right_cell_status, set_island_right_cell_status) = React.useState(() => Utils.Send);
 
     <Provider value={ 
+        tezos: tezos,
+        set_tezos: set_tezos,
         user_address: user_address,
         set_user_address: set_user_address,
         user_xtz_balance: user_xtz_balance,

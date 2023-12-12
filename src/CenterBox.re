@@ -15,6 +15,34 @@ let make = (~wallet, ~set_wallet) => {
   let show_selected_token = Context.Utils.(show_selected_token);
 
   let (error_amount, set_error_amount) = React.useState(_ => false);
+  let (recipient, set_recipient) = React.useState(_ => None);
+  let (recipient_error, _set_recipient_error) = React.useState(_ => false);
+
+  let transfer_xtz = () => {
+    switch (context.tezos, context.amount_to_send, recipient) {
+      | (None, _, _) => Js.Console.error("TezosToolkit hasn't been instantiated")
+      | (Some(tezos), Some(amount), Some(recipient)) => {
+        let transfer_param: BeaconWallet.transfer_param = { to_: recipient, amount: amount };
+        let _ = 
+          tezos
+          |> Taquito.TezosToolkit.wallet
+          |> BeaconWallet.transfer(transfer_param)
+          |> BeaconWallet.WalletSend.send
+          |> Js.Promise.then_(op => {
+            let _ = Js.log(op |> BeaconWallet.WalletOperation.hash);
+            let _ = 
+              op
+              |> BeaconWallet.WalletOperation.confirmation(~confirmations=1, ~timeout=15000)
+              |> Js.Promise.then_(res => {
+                let _ = Js.log(res);
+                Js.Promise.resolve()
+              });
+            Js.Promise.resolve()
+          })
+      }
+      | _ => Js.Console.error("An error has occured while initiating the transfer")
+    }
+  };
 
   <div className=styles##box> 
       <h1> {"Welcome to the Tezos Melange app"->React.string} </h1>
@@ -30,7 +58,14 @@ let make = (~wallet, ~set_wallet) => {
                     name="action-select" 
                     value={show_selected_token(XTZ)} 
                     checked={context.selected_token == XTZ}
-                    onChange=(_ => context.set_selected_token(_ => XTZ))
+                    onChange=(_ => {
+                      let _ = (
+                        context.set_amount_to_send(_ => None), 
+                        set_error_amount(_ => false),
+                        context.set_island_right_cell_status(_ => Send)
+                      );
+                      context.set_selected_token(_ => XTZ)
+                    })
                   />
                   <span>{"Send XTZ"->React.string}</span>
                 </label>
@@ -40,7 +75,14 @@ let make = (~wallet, ~set_wallet) => {
                     name="action-select" 
                     value={show_selected_token(UUSD)}  
                     checked={context.selected_token == UUSD}
-                    onChange=(_ => context.set_selected_token(_ => UUSD))
+                    onChange=(_ => {
+                      let _ = (
+                        context.set_amount_to_send(_ => None), 
+                        set_error_amount(_ => false),
+                        context.set_island_right_cell_status(_ => Send)
+                      );
+                      context.set_selected_token(_ => UUSD)
+                    })
                   />
                   <span>{"Send uUSD"->React.string}</span>
                 </label>
@@ -78,7 +120,7 @@ let make = (~wallet, ~set_wallet) => {
                                 switch ((Context.Utils.token_from_display(value, XTZ)), context.user_xtz_balance) {
                                   | (Ok(value), Some(balance)) => {
                                     // compares value with XTZ balance
-                                    if (value > balance) {
+                                    if (value > (balance |> Belt.Int.toFloat)) {
                                       let _ = context.set_island_right_cell_status(_ => Error);
                                       set_error_amount(_ => true);
                                     } else {
@@ -101,8 +143,7 @@ let make = (~wallet, ~set_wallet) => {
                                 switch ((Context.Utils.token_from_display(value, UUSD)), context.user_uusd_balance) {
                                   | (Ok(value), Some(balance)) => {
                                     // compares value with uUSD balance
-                                    let _ = Js.log2(value, balance);
-                                    if (value > balance) {
+                                    if (value > (balance |> Belt.Int.toFloat)) {
                                       let _ = context.set_island_right_cell_status(_ => Error);
                                       set_error_amount(_ => true);
                                     } else {
@@ -135,8 +176,27 @@ let make = (~wallet, ~set_wallet) => {
                   }
                 }
               />
+              <input
+                type_="text"
+                placeholder="Recipient"
+                className={recipient_error == true ? "error" : ""}
+                value={
+                  switch recipient {
+                    | None => ""
+                    | Some(value) => value
+                  }
+                }
+                onChange={event => {
+                  let value = ReactEvent.Form.target(event)##value;
+                  set_recipient(_ => value)
+                }}
+              />
               <div className=styles##buttons>
-                <button>{("Send " ++ show_selected_token(context.selected_token))->React.string}</button>
+                <button
+                  onClick=(_ => transfer_xtz())
+                >
+                  {("Send " ++ show_selected_token(context.selected_token))->React.string}
+                </button>
                 <WalletButton wallet set_wallet />
               </div>
             </div>

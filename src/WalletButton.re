@@ -5,6 +5,15 @@ let make = (
     ) => {
     let context = React.useContext(Context.context);
 
+    let set_wallet_provider = (wallet: BeaconWallet.t) => {
+        switch context.tezos {
+            | None => Js.Console.error("TezosToolkit hasn't been instantiated")
+            | Some(tezos) => {
+                tezos |> Taquito.TezosToolkit.set_wallet_provider(wallet)
+            }
+        }
+    }
+
     let connect_wallet = () => {
         switch(wallet) {
             | None => {
@@ -21,7 +30,8 @@ let make = (
                             |> Js.Promise.then_(address => {
                                 let _ = context.set_user_address(_ => Some(address));
                                 Js.Promise.resolve()
-                            })
+                            });
+                        let _ = set_wallet_provider(new_wallet);
                         Js.Promise.resolve()
                     })
                     |> Js.Promise.catch(err => {
@@ -63,6 +73,7 @@ let make = (
                 | Some(active_account) => {
                     let _ = set_wallet(_ => Some(new_wallet));
                     let _ = context.set_user_address(_ => Some(active_account##address));
+                    let _ = set_wallet_provider(new_wallet);
                     Js.Promise.resolve()
                 }
             }

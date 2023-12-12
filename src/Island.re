@@ -7,7 +7,8 @@ type styles_css = {.
   "right": string,
   "small": string,
   "wide": string,
-  "pulsate": string
+  "pulsate": string,
+  "error": string
 };
 
 type image = {. 
@@ -31,7 +32,7 @@ let make = (
     ~update_right_cell: (Context.Utils.right_cell_status => Context.Utils.right_cell_status) => unit,
     ~selected_token: Context.selected_token) => {
 
-    let (_, set_typing_timeout) = React.useState(() => None);
+    let (typing_timeout, set_typing_timeout) = React.useState(() => None);
 
     React.useEffect1(() => {
         let _ = 
@@ -50,7 +51,14 @@ let make = (
                         }, timeout)->Some
                     })
                 }
-                | _ => set_typing_timeout(_ => None)
+                | _ => 
+                    switch typing_timeout {
+                        | None => ()
+                        | Some(timeout) => {
+                            let _ = Js.Global.clearTimeout(timeout);
+                            set_typing_timeout(_ => None)
+                        }
+                    }
             };
 
         None
@@ -92,7 +100,7 @@ let make = (
                                 </>
                         }
                     | Sending => React.null
-                    | Error => <img src=error_logo alt="error" />
+                    | Error => <img className=styles##error src=error_logo alt="error" />
                     | Typing => <img className=styles##pulsate src=keyboard_logo alt="keyboard" />
                 })
             }

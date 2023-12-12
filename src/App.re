@@ -2,15 +2,14 @@
 let make = () => {
     let context = React.useContext(Context.context);
     
-    let (tezos, set_tezos) = React.useState(() => None)
     let (level, set_level) = React.useState(() => None);
     let (wallet, set_wallet) = React.useState(() => None);
 
     React.useEffect1(() => {
         open Taquito;
 
-        let tezos = tezos_toolkit("https://mainnet.ecadinfra.com");
-        let _ = set_tezos(_ => Some(tezos));
+        let tezos = tezos_toolkit("https://ghostnet.ecadinfra.com");
+        let _ = context.set_tezos(_ => Some(tezos));
         let rpc = tezos |> TezosToolkit.rpc;
         let _ = rpc |> RpcClient.get_block_header |> Js.Promise.then_(res => {
         let _ = set_level(_ => Some(res.level));
@@ -30,14 +29,14 @@ let make = () => {
         }
         | Some(address) => {
             let _ = context.set_selected_token(_ => XTZ);
-            switch tezos {
+            switch context.tezos {
             | None => None
             | Some(tezos) => {
                 // fetches the XTZ balance
                 let _ = 
                 tezos
-                -> TezosToolkit.tz_provider
-                -> TzProvider.get_balance(address)
+                |> TezosToolkit.tz_provider
+                |> TzProvider.get_balance(address)
                 |> Js.Promise.then_(res => {
                     let _ = switch (Js.Nullable.toOption(res)){
                         | None => context.set_xtz_balance(_ => Some(0))
@@ -48,8 +47,8 @@ let make = () => {
                 // fetches the uUSD balance
                 let _ =
                 tezos
-                -> TezosToolkit.contract
-                -> ContractProvider.at(Context.Utils.uusd_address)
+                |> TezosToolkit.contract
+                |> ContractProvider.at(Context.Utils.uusd_address)
                 |> Js.Promise.then_(res => {
                     let _ = switch (Js.Nullable.toOption(res)) {
                     | None => Js.log("failed to fetch the contract")
@@ -62,11 +61,12 @@ let make = () => {
                             | None => Js.log("failed to fetch the contract storage")
                             | Some(storage) => {
                                 // finds the user's balance in the storage
-                                let key: Uusd.Ledger.key = { owner: address, token_id: 0};
+                                // let key: Uusd.Ledger.key = { owner: address, token_id: 0};
+                                let key: Uusd.Ledger.key = (address, 0);
                                 let _ = 
                                 storage
-                                ->Uusd.ledger
-                                ->Uusd.Ledger.get(key)
+                                |>Uusd.ledger
+                                |>Uusd.Ledger.get(key)
                                 |> Js.Promise.then_(res => {
                                     let _ = switch(Js.Nullable.toOption(res)) {
                                     | None => context.set_uusd_balance(_ => Some(0))
