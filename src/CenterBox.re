@@ -16,7 +16,8 @@ let make = (~wallet, ~set_wallet) => {
 
   let (error_amount, set_error_amount) = React.useState(_ => false);
   let (recipient, set_recipient) = React.useState(_ => None);
-  let (recipient_error, _set_recipient_error) = React.useState(_ => false);
+  let (recipient_error, set_recipient_error) = React.useState(_ => false);
+  let (is_transfer_disabled, set_transfer_disabled) = React.useState(_ => true);
 
   let transfer_xtz = () => {
     switch (context.tezos, context.amount_to_send, recipient) {
@@ -43,6 +44,23 @@ let make = (~wallet, ~set_wallet) => {
       | _ => Js.Console.error("An error has occured while initiating the transfer")
     }
   };
+
+  React.useEffect2(() => {
+    let disabled_transfer = 
+      switch (context.amount_to_send, recipient) {
+        // TODO: check the amount is valid
+        | (Some(amount), Some(recipient)) => 
+          let _ = Js.log4(!(amount > 0.) , Js.String.length(recipient) < 1, error_amount, recipient_error);
+          !(amount > 0.) 
+          || Js.String.length(recipient) < 1
+          || error_amount 
+          || recipient_error
+        | _ => true
+      };
+    let _ = set_transfer_disabled(_ => disabled_transfer);
+
+    None
+  }, (context.amount_to_send, recipient));
 
   <div className=styles##box> 
       <h1> {"Welcome to the Tezos Melange app"->React.string} </h1>
@@ -188,11 +206,19 @@ let make = (~wallet, ~set_wallet) => {
                 }
                 onChange={event => {
                   let value = ReactEvent.Form.target(event)##value;
-                  set_recipient(_ => value)
+                  let _ = set_recipient(_ => value);
+                  if (Js.String.length(value) > 0 && Taquito.Utils.validate_address(value) != 3) {
+                    let _ = set_recipient_error(_ => true);
+                    context.set_island_right_cell_status(_ => Error)
+                  } else {
+                    let _ = set_recipient_error(_ => false);
+                    context.set_island_right_cell_status(_ => Send)
+                  }
                 }}
               />
               <div className=styles##buttons>
                 <button
+                  disabled={is_transfer_disabled}
                   onClick=(_ => transfer_xtz())
                 >
                   {("Send " ++ show_selected_token(context.selected_token))->React.string}

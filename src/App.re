@@ -92,9 +92,15 @@ let make = () => {
         }
     }, [|context.user_address|]);
 
-    <>
-        <Header level />
-        <CenterBox set_wallet wallet />
-        <footer></footer>
-    </>
+    {
+        switch context.tezos {
+            | None => React.null
+            | Some(_) =>
+                <>
+                    <Header level />
+                    <CenterBox set_wallet wallet />
+                    <footer></footer>
+                </>
+        }
+    }
 }

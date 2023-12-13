@@ -107,4 +107,9 @@ module TezosToolkit {
 [@mel.new] [@mel.module "@taquito/taquito"] 
     external tezos_toolkit: string => TezosToolkit.t = "TezosToolkit" ;
 
+// UTILS
+module Utils = {
+    type t;
 
+    [@mel.module "@taquito/utils"] external validate_address: string => int = "validateAddress"
+}

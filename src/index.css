@@ -38,10 +38,14 @@ button {
   --webkit-backdrop-filter: blur(5px);
   transition: 0.3s;
 }
-button:hover {
+button:not(:disabled):hover {
   color: white;
   background-color: #137a63;
   border: solid 1px #137a63;
+}
+button:disabled {
+  color: #67837d;
+  cursor: not-allowed;
 }
 
 input[type="text"] {
