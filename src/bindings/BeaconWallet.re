@@ -6,9 +6,18 @@ type t = {
 };
 
 type wallet_options;
+
+[@deriving abstract]
+type wallet_options_type = {
+    [@mel.as "type"]
+    type_: string,
+    [@optional]
+    rpcUrl: option(string)
+};
 [@mel.obj]
 external new_wallet_options: (
     ~name: string,
+    ~network: wallet_options_type,
     ~description: string=?,
     unit
 ) => wallet_options;

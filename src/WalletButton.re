@@ -17,7 +17,8 @@ let make = (
     let connect_wallet = () => {
         switch(wallet) {
             | None => {
-                let wallet_options = BeaconWallet.new_wallet_options(~name="Tezos Melange App", ());
+                let network = BeaconWallet.wallet_options_type(~type_="ghostnet", ());
+                let wallet_options = BeaconWallet.new_wallet_options(~name="Tezos Melange App", ~network=network, ());
                 let new_wallet = BeaconWallet.new_wallet(wallet_options);
                 set_wallet(_ => Some(new_wallet))
                 let _ = 
@@ -59,7 +60,8 @@ let make = (
     }
 
     React.useEffect1(() => {
-        let wallet_options = BeaconWallet.new_wallet_options(~name="Tezos Melange App", ());
+        let network = BeaconWallet.wallet_options_type(~type_="ghostnet", ());
+        let wallet_options = BeaconWallet.new_wallet_options(~name="Tezos Melange App", ~network=network, ());
         let new_wallet = BeaconWallet.new_wallet(wallet_options);
         let _ = new_wallet.client 
         |> BeaconWallet.get_active_account 
