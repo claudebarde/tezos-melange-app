@@ -12,6 +12,7 @@ module Utils = {
     | Send
     | Sending
     | Error
+    | Success
 
     // let uusd_address = "KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW";
     let uusd_address = "KT1LkNWZgVYh3zdaRkBb9aNgLEFCjVJwEKu2";

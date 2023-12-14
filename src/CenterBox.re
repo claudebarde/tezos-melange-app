@@ -20,24 +20,65 @@ let make = (~wallet, ~set_wallet) => {
   let (is_transfer_disabled, set_transfer_disabled) = React.useState(_ => true);
 
   let transfer_xtz = () => {
-    switch (context.tezos, context.amount_to_send, recipient) {
-      | (None, _, _) => Js.Console.error("TezosToolkit hasn't been instantiated")
-      | (Some(tezos), Some(amount), Some(recipient)) => {
+    open Taquito;
+
+    let _ = context.set_island_right_cell_status(_ => Sending);
+    switch (context.tezos, context.amount_to_send, recipient, context.user_address) {
+      // checks if the TezosToolkit has been intialized
+      | (None, _, _, _) => Js.Console.error("TezosToolkit hasn't been instantiated")
+      | (Some(tezos), Some(amount), Some(recipient), Some(user_address)) => {
+        // builds the transfer parameters
         let transfer_param: BeaconWallet.transfer_param = { to_: recipient, amount: amount };
+        // sends the transfer of XTZ
         let _ = 
           tezos
-          |> Taquito.TezosToolkit.wallet
+          |> TezosToolkit.wallet
           |> BeaconWallet.transfer(transfer_param)
           |> BeaconWallet.WalletSend.send
           |> Js.Promise.then_(op => {
+            // if the operation is successfully sent
             let _ = Js.log(op |> BeaconWallet.WalletOperation.hash);
+            // waits for 1 confirmation
             let _ = 
               op
               |> BeaconWallet.WalletOperation.confirmation(~confirmations=1, ~timeout=15000)
               |> Js.Promise.then_(res => {
+                // if the operation is confirmed
                 let _ = Js.log(res);
+                let _ = context.set_island_right_cell_status(_ => Success);
+                let _ = Js.Global.setTimeout(() => context.set_island_right_cell_status(_ => Send), 3_000);
+                let _ = (context.set_amount_to_send(_ => None), set_recipient(_ => None));
+                // fetches the new XTZ balance
+                let _ = 
+                  tezos
+                  |> TezosToolkit.tz_provider
+                  |> TzProvider.get_balance(user_address)
+                  |> Js.Promise.then_(res => {
+                      // updated the balance
+                      let _ = switch (Js.Nullable.toOption(res)){
+                          | None => context.set_xtz_balance(_ => Some(0))
+                          | Some(balance) => context.set_xtz_balance(_ => Some(BigNumber.to_number(balance)))
+                      };
+                      Js.Promise.resolve()
+                    })
+                    |> Js.Promise.catch(err => {
+                      let _ = Js.Console.error(err);
+                      context.set_xtz_balance(_ => None)
+                      Js.Promise.resolve()
+                    });
+                Js.Promise.resolve()
+              })
+              |> Js.Promise.catch(err => {
+                // if there was a problem sending the operation
+                let _ = Js.Console.error(err);
+                let _ = context.set_island_right_cell_status(_ => Error);
                 Js.Promise.resolve()
               });
+            Js.Promise.resolve()
+          })
+          |> Js.Promise.catch(err => {
+            let _ = Js.Console.error(err);
+            let _ = context.set_island_right_cell_status(_ => Error);
             Js.Promise.resolve()
           })
       }
@@ -50,7 +91,6 @@ let make = (~wallet, ~set_wallet) => {
       switch (context.amount_to_send, recipient) {
         // TODO: check the amount is valid
         | (Some(amount), Some(recipient)) => 
-          let _ = Js.log4(!(amount > 0.) , Js.String.length(recipient) < 1, error_amount, recipient_error);
           !(amount > 0.) 
           || Js.String.length(recipient) < 1
           || error_amount 
@@ -207,9 +247,18 @@ let make = (~wallet, ~set_wallet) => {
                 onChange={event => {
                   let value = ReactEvent.Form.target(event)##value;
                   let _ = set_recipient(_ => value);
-                  if (Js.String.length(value) > 0 && Taquito.Utils.validate_address(value) != 3) {
-                    let _ = set_recipient_error(_ => true);
-                    context.set_island_right_cell_status(_ => Error)
+                  if (Js.String.length(value) > 0) {
+                    switch (Taquito.Utils.validate_address(value)) {
+                      | Ok() => {
+                        let _ = set_recipient_error(_ => false);
+                        context.set_island_right_cell_status(_ => Send)
+                      }
+                      | Error(err) => {
+                        let _ = Js.log(err);
+                        let _ = set_recipient_error(_ => true);
+                        context.set_island_right_cell_status(_ => Error)
+                      }
+                    }
                   } else {
                     let _ = set_recipient_error(_ => false);
                     context.set_island_right_cell_status(_ => Send)

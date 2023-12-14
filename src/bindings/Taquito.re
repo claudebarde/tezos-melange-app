@@ -111,5 +111,23 @@ module TezosToolkit {
 module Utils = {
     type t;
 
-    [@mel.module "@taquito/utils"] external validate_address: string => int = "validateAddress"
+    type validated_address = 
+    | NO_PREFIX_MATCHED
+    | INVALID_CHECKSUM
+    | INVALID_LENGTH
+    | VALID
+    | UNKNOWN;
+
+    [@mel.module "@taquito/utils"] external validate_address_taq: string => int = "validateAddress";
+
+    let validate_address = (address: string): result(unit, validated_address) => {
+        switch (validate_address_taq(address)) {
+            | 0 => Error(NO_PREFIX_MATCHED)
+            | 1 => Error(INVALID_CHECKSUM)
+            | 2 => Error(INVALID_LENGTH)
+            | 3 => Ok()
+            | _ => Error(UNKNOWN)
+        }
+        
+    };
 }

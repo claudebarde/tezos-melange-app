@@ -8,7 +8,8 @@ type styles_css = {.
   "small": string,
   "wide": string,
   "pulsate": string,
-  "error": string
+  "error": string,
+  "hourglass": string
 };
 
 type image = {. 
@@ -23,6 +24,8 @@ type image = {.
 [@mel.module "./assets/send-90.png"] external send_logo: string = "default";
 [@mel.module "./assets/keyboard-90.png"] external keyboard_logo: string = "default";
 [@mel.module "./assets/error-90.png"] external error_logo: string = "default";
+[@mel.module "./assets/hourglass-90.png"] external hourglass_logo: string = "default";
+[@mel.module "./assets/thumb-up-90.png"] external thumb_up_logo: string = "default";
 
 [@react.component]
 let make = (
@@ -99,7 +102,8 @@ let make = (
                                     {Context.Utils.show_selected_token(selected_token)}->React.string
                                 </>
                         }
-                    | Sending => React.null
+                    | Sending => <img className=styles##hourglass src=hourglass_logo alt="hourglass" />
+                    | Success => <img src=thumb_up_logo alt="error" />
                     | Error => <img className=styles##error src=error_logo alt="error" />
                     | Typing => <img className=styles##pulsate src=keyboard_logo alt="keyboard" />
                 })

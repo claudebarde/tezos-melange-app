@@ -12,8 +12,17 @@ let make = () => {
         let _ = context.set_tezos(_ => Some(tezos));
         let rpc = tezos |> TezosToolkit.rpc;
         let _ = rpc |> RpcClient.get_block_header |> Js.Promise.then_(res => {
-        let _ = set_level(_ => Some(res.level));
-        Js.Promise.resolve();
+            let _ = set_level(_ => Some(res.level));
+            let _ = Js.Global.setInterval(() => {
+                let _ = rpc 
+                |> RpcClient.get_block_header 
+                |> Js.Promise.then_(res => {
+                    let _ = set_level(_ => Some(res.level));
+                    Js.Promise.resolve();
+                });
+                ()
+            }, 10_000);
+            Js.Promise.resolve();
         })
         None
     }, [||]);
@@ -34,15 +43,15 @@ let make = () => {
             | Some(tezos) => {
                 // fetches the XTZ balance
                 let _ = 
-                tezos
-                |> TezosToolkit.tz_provider
-                |> TzProvider.get_balance(address)
-                |> Js.Promise.then_(res => {
-                    let _ = switch (Js.Nullable.toOption(res)){
-                        | None => context.set_xtz_balance(_ => Some(0))
-                        | Some(balance) => context.set_xtz_balance(_ => Some(BigNumber.to_number(balance)))
-                    };
-                    Js.Promise.resolve()
+                    tezos
+                    |> TezosToolkit.tz_provider
+                    |> TzProvider.get_balance(address)
+                    |> Js.Promise.then_(res => {
+                        let _ = switch (Js.Nullable.toOption(res)){
+                            | None => context.set_xtz_balance(_ => Some(0))
+                            | Some(balance) => context.set_xtz_balance(_ => Some(BigNumber.to_number(balance)))
+                        };
+                        Js.Promise.resolve()
                     });
                 // fetches the uUSD balance
                 let _ =
